@@ -11,14 +11,11 @@ public class MultiLayerPerceptron {
 
     private static final Random RANDOM = new Random();
     private static final double MAX_THETA = 1.0, MIN_THETA = 0.0;
-    private final double MAX_WEIGHT, MIN_WEIGHT;
+    private static final double MAX_WEIGHT = 0.5, MIN_WEIGHT = -0.5;
     private static final double LAMBDA = 1.0, ALPHA = 1.0;
 
     public MultiLayerPerceptron(int[] architecture) {
         this.architecture = architecture;
-
-        this.MAX_WEIGHT = 2.4 / (double) this.architecture[0];
-        this.MIN_WEIGHT = -MAX_WEIGHT;
 
         layers = new ArrayList<>();
         for (int i = 0; i < this.architecture.length; i++) {
@@ -62,13 +59,14 @@ public class MultiLayerPerceptron {
                     sum += edge.getNeuronIn().getY() * edge.getWeight();
                 }
                 neurons[j].setX(sum - neurons[j].getTheta());
-                if (i != architecture.length - 1) {
-                    neurons[j].setY(sigmoide(neurons[j].getX()));
-                }
+                /*if (i != architecture.length - 1) {
+                 neurons[j].setY(sigmoide(neurons[j].getX()));
+                 }*/
+                neurons[j].setY(sigmoide(neurons[j].getX()));
             }
         }
         Neuron neuronK = layers.get(architecture.length - 1)[0];
-        double yK = neuronK.getX();
+        double yK = neuronK.getY();
         double error = truthTable[index][architecture[0]] - yK;
 
         double deltaK = yK * (1 - yK) * error;
@@ -108,11 +106,11 @@ public class MultiLayerPerceptron {
         return 0.0;
     }
 
-    public void test(int[][] truthTable) {
-        for (int[] line : truthTable) {
+    public double[] test(int[][] truthTable) {
+        double[] out = new double[truthTable.length];
+        for (int i = 0; i < truthTable.length; i++) {
             for (int j = 0; j < architecture[0]; j++) {
-                layers.get(0)[j].setY(line[j]);
-                System.out.print(layers.get(0)[j].getY() + "\t");
+                layers.get(0)[j].setY(truthTable[i][j]);
             }
 
             for (int j = 1; j < architecture.length; j++) {
@@ -123,12 +121,14 @@ public class MultiLayerPerceptron {
                         sum += edge.getNeuronIn().getY() * edge.getWeight();
                     }
                     neurons[k].setX(sum - neurons[k].getTheta());
-                    if (j != architecture.length - 1) {
-                        neurons[k].setY(sigmoide(neurons[k].getX()));
-                    }
+                    /*if (j != architecture.length - 1) {
+                     neurons[k].setY(sigmoide(neurons[k].getX()));
+                     }*/
+                    neurons[k].setY(sigmoide(neurons[k].getX()));
                 }
             }
-            System.out.println(layers.get(architecture.length - 1)[0].getX());
+            out[i] = layers.get(architecture.length - 1)[0].getY();
         }
+        return out;
     }
 }
